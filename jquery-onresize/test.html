@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>jQuery UI onresize widget</title>
+	<style>
+	#test {
+    	position: relative;
+	    width: 50px;
+	    height: 50px;
+	    background: #00f;
+	}
+	</style>
+	<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script src="jquery.onresize.min.js"></script>
+	<script>
+	$(function() {
+		$('#test').onresize(function(e) {
+		    $('#height').text($(this).height());
+		    $('#width').text($(this).width());
+		});
+
+		// drag to resize
+
+		var height;
+		var width;
+
+		$('#test').on('dragstart', function(e) {
+		    var el = $(this);
+		    height = el.height();
+		    width = el.width();
+		});
+
+		$('#test').on('drag', function(e) {
+		    $(this).css({
+		        height: Math.max(10, height + e.deltaY) + 'px',
+		    	width: Math.max(10, width + e.deltaX) + 'px'
+		    });
+		});
+
+		// drag* events
+
+		var dragging = false;
+		var dragElement = null;
+		var dragStart = { x: 0, y: 0 };
+
+		$(window).on('mousedown', function(e) {
+		    dragging = true;
+		    dragElement = $(e.target);
+		    dragStart.x = e.pageX;
+		    dragStart.y = e.pageY;
+		    
+		    dragElement.trigger('dragstart');
+		    
+		    $(window).disableSelection();
+		});
+
+		$(window).on('mousemove', function(e) {
+		    if (!dragging) {
+		        return;
+		    }
+		    
+		    var evt = $.Event('drag', {
+		        deltaX: e.pageX - dragStart.x,
+		        deltaY: e.pageY - dragStart.y
+		    });
+			
+			dragElement.trigger(evt);
+		});
+
+		$(window).on('mouseup', function(e) {
+		    dragging = false;
+		    
+			dragElement.trigger('dragstop');
+		    
+		    $(window).enableSelection();
+		});
+	});
+	</script>
+</head>
+<body>
+	<div>Width: <span id="width">50</span>, Height: <span id="height">50</span></div>
+	<div><i style="font-size: 75%;">click and drag inside the blue box to test.</i></div>
+	<div id="test"></div>
+</body>
+</html>

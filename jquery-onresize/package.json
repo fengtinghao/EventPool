@@ -1,0 +1,58 @@
+{
+  "name": "jquery-onresize",
+  "title": "jQuery Resize Element Events",
+  "version": "1.0.5",
+  "description": "jQuery UI widget enabling cross browser resize events on regular (non-void) elements, without using iframes or timers.",
+  "keywords": [
+    "jquery-plugin",
+    "ecosystem:jquery",
+    "resize",
+    "element",
+    "event",
+    "dynamic",
+    "size"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChrisAckerman/jquery-onresize.git"
+  },
+  "author": {
+    "name": "Chris Ackerman",
+    "email": "chris@topher.land"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "http://opensource.org/licenses/MIT"
+  },
+  "bugs": {
+    "url": "https://github.com/ChrisAckerman/jquery-onresize/issues"
+  },
+  "homepage": "https://github.com/ChrisAckerman/jquery-onresize#readme",
+  "demo": "https://jsfiddle.net/spacemanspiffiest/77gjeunv/embedded/result/",
+  "download": "https://raw.github.com/ChrisAckerman/jquery-onresize/1.0.5/onresize.min.js",
+  "gitHead": "f7ae8888bd43c57f68506aaa81228a86de41376c",
+  "_id": "jquery-onresize@1.0.5",
+  "_shasum": "c762acd4f1cf60b881a29812d688de6ed6b84c1c",
+  "_from": "jquery-onresize@latest",
+  "_npmVersion": "2.11.3",
+  "_nodeVersion": "0.12.7",
+  "_npmUser": {
+    "name": "bluejeansandrain",
+    "email": "chris@topher.land"
+  },
+  "dist": {
+    "shasum": "c762acd4f1cf60b881a29812d688de6ed6b84c1c",
+    "tarball": "https://registry.npmjs.org/jquery-onresize/-/jquery-onresize-1.0.5.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "bluejeansandrain",
+      "email": "chris@topher.land"
+    }
+  ],
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/jquery-onresize/-/jquery-onresize-1.0.5.tgz"
+}

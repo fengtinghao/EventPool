@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+uglifyjs jquery.onresize.js -c -m > jquery.onresize.min.js

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="//code.jquery.com/jquery-latest.min.js"></script>
+<!--<script src="//code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>-->
+<!--<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">-->
+<script src="jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="jquery-ui-1.12.1/jquery-ui.min.css">
+
+<script src="jquery-onresize/jquery.onresize.min.js"></script>
+<link rel="stylesheet" href="bootstrap.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.10.0/math.min.js"></script>
+<!--<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>-->
+<script src="https://d3js.org/d3.v3.js" charset="utf-8"></script>
+<script src="toolbar.js"></script>
+<script src="time.js"></script>
+<script src="line.js"></script>
+<script src="pool.js"></script>
+<script src="overview.js"></script>
+<script src="control.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="split.css">
+<link rel="stylesheet" href="pool.css">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Pool</title>
+</head>
+
+<style id="high_bg"></style>
+<style id="mid_bg"></style>
+<style id="low_bg"></style>
+
+<style id="style_css">
+
+</style>
+<style id="high_style"></style>
+<style id="mid_style"></style>
+<style id="low_style"></style>
+
+<svg id="style" style="position: absolute; visibility: hidden"><defs></defs>
+</svg>
+<body>
+<div style="text-align: center;width: 80%;margin-left: 12%;background: whitesmoke;border-bottom: 1px solid gray;">
+    <ul id="main-nav" class="horizon_list" style="font-size:12px;display: none;">
+        <li id="nav-head">
+           Criteria:
+            <select onchange="update_target()" name="threshold_mode">
+                <option value="value" selected>Value</option>
+                <option value="rank">Rank</option>
+                <option value="speed">Avg Change</option>
+                <option value="ratio">Avg Chg%</option>
+                <option value="various">Variance</option>
+            </select>
+            <span id="sort_target_option">
+            over
+                <select id="speed_smooth_window" onchange="update_target()">
+                    <option value="1" selected>1</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                </select> steps
+            </span>
+        </li>
+    </ul>
+</div>
+<span id="nav-parent"></span>
+
+    <!--<span class="horizon_list" id="main-nav" style="width: 60%; margin-left: 12%; text-align: center"></span>-->
+    <div id="contain" style="height: 95vh;">
+        <div id="up" class="split split-vertical">
+            <div id="line_axis" style="float: left; width: 12%; height: 100%; overflow:hidden"></div>
+            <div id="line" style="float: left; width: 59.7%; height: 100%; overflow:hidden; position: relative;">
+                <div style="position: absolute; left: 10px;display:none;">
+                    <button id="brush_toggle" class="button_enable" onclick="brush_toggle()">
+                        <img src="brush.png" width="20", height="20">
+                    </button><br>
+                    <button id="lightup">
+                        <img src="clear.png" width="20", height="20">
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="down" class="split split-vertical">
+            <div>
+                <div id="time" style="width: 72%; height: 58px; float: left; position: relative;">
+                </div>
+                <div id="time_right" style="margin-left: 72%; height: 58px; position: relative;z-index: 10000;">
+                </div>
+            </div>
+            <div style="position: relative; height: calc(100% - 60px); width: 100%; margin-top: 5px">
+                <div id="pool" style="float: left; width: calc(72% + 8px); height: 100%; overflow:auto"></div>
+                <div id="overview" style="margin-left: calc(72% + 8px); height: 100%"></div>
+                <div id="hover" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="toolbar" style="position: absolute; top: 25px; z-index: 100000;display: none;">
+        <!-- <div class="w3-bar w3-light-grey" style="height: 28px; border-bottom: 1px solid gray;display:none;">
+            <button class="w3-bar-item w3-button tablink w3-khaki" onclick="openCity(event,'Sort')">Sort</button>
+            <button class="w3-bar-item w3-button tablink" onclick="openCity(event,'Tokyo')">Filter</button>
+        </div> -->
+
+        <div id="Sort" class="city" style="font-size: 12px;">
+            <p></p>
+            <table>
+                <tr>
+                    <td>Sort  By:</td>
+                    <td>
+                        <select id="speed_sort_mode" onchange="contro.sort()">
+                            <!--<option value="label">label</option>-->
+                            <option value="length" selected>segment length</option>
+                            <option value="seg">average value</option>
+                            <option value="total">increased value</option>
+                        </select>
+                        <span id="sort_mode_option">
+                        of
+                            <div id="sort_target" style="display: inline-block; margin-right: 30px;">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" style="width: 40px; height: 20px; padding-right: 30px">
+                                        <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" class="high_bg" onclick="contro.change_sort_mode('high')"></a></li>
+                                        <li><a href="#" class="mid_bg" onclick="contro.change_sort_mode('mid')"></a></li>
+                                        <li><a href="#" class="low_bg" onclick="contro.change_sort_mode('low')"></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="checkbox" onclick="toggle_sort_window()">Within a time window</td>
+                </tr>
+                <tr>
+                    <td>Group By:</td>
+                    <td>
+                        <select id="group_select" onchange="contro.change_group_mode()">
+                            <option value="no" selected> no group </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Go to: </td>
+                    <td><input id="goto"></td>
+                </tr>
+                <tr>
+                    <td valign="top">Filter:</td>
+                    <td style="line-height: 30px;">
+                        Keep
+                        <div id="filter_target" style="margin-left: 5px; display: inline-block">
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" style="width: 40px; height: 20px;">
+                                    <span style="position: absolute; top: 0px; left: 12px;">All</span>
+                                    <span class="caret"></span></button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#" class="high_bg" onclick="contro.filter_target_changed('high')"></a></li>
+                                    <li><a href="#" class="mid_bg" onclick="contro.filter_target_changed('mid')"></a></li>
+                                    <li><a href="#" class="low_bg" onclick="contro.filter_target_changed('low')"></a></li>
+                                    <li><a href="#" onclick="contro.filter_target_changed('all')">All</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        segments<br>longer than
+                        <!-- <span class="slider_label" name="min"></span><span class="unit"></span> -->
+                        <input type="text" class="slider_label" name="min"><span class="unit"></span>
+                        <div class="slider filter_tool" name="min"></div>
+                        and shorter than
+                        <input type="text" class="slider_label" name="max"><span class="unit"></span>
+                        <div class="slider filter_tool" name="max"></div>
+                    </td>
+                </tr>
+            </table>
+            <ul id="group_labels"></ul>
+        </div>
+
+        <!-- <div id="Tokyo" class="city" style="display:none">
+            <input type="checkbox" onclick="toggle_filter_tool()" checked>visual filter tool
+            <div>
+                Keep
+                <div id="filter_target" style="margin-left: 5px; display: inline-block">
+                    <div class="dropdown"> -->
+                        <!-- <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" style="width: 40px; height: 20px;"> -->
+                            <!-- <span style="position: absolute; top: 0px; left: 12px;">All</span> -->
+                            <!-- <span class="caret"></span> -->
+                        <!-- </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="high_bg" onclick="contro.filter_target_changed('high')"></a></li>
+                            <li><a href="#" class="mid_bg" onclick="contro.filter_target_changed('mid')"></a></li>
+                            <li><a href="#" class="low_bg" onclick="contro.filter_target_changed('low')"></a></li>
+                            <li><a href="#" onclick="contro.filter_target_changed('all')">All</a></li>
+                        </ul>
+                    </div>
+                </div>
+                longer than
+                <span class="slider_label" name="min"></span><span class="unit"></span>
+                <input type="button" onclick="filte.toggle_filter_end(0)" style="cursor: pointer; height:20px" value="x"/>
+            </div>
+            <div class="slider filter_tool" name="min"></div>
+            <div class="filter_tool" id='vis_filter'></div>
+            <div class="slider filter_tool" name="max"></div>
+            <div>
+                and shorter than
+                <span class="slider_label" name="max"></span><span class="unit"></span>
+                <input type="button" onclick="filte.toggle_filter_end(1)" style="cursor: pointer; height:20px" value="x"/>
+            </div>
+        </div> -->
+    </div>
+    <div style="position: absolute" id="input_slider">
+        <div></div>
+    </div>
+</body>
+<!--<script id="js"></script>-->
+<script src="Split.js/split.js"></script>
+
+<script>
+    var list = window.location.search.substring(1).split('&');
+    var threshold_mode = list[0];
+    var data_source = list[1];
+
+    // var threshold_mode = 'general';
+    // var data_source = 'le';
+
+    var target = 'value';
+    var title = "";
+
+    $( "#draggable" ).draggable({ handle: "p" });
+
+    $('#input_slider').hide();
+//    $('#js').attr('src', 'refs/' + threshold_mode+'.js');
+//    threshold_mode = 'general2';
+//    data_source = 'le';
+    if (threshold_mode=='general'){
+        $('#sort_target li')[1].remove();
+        $('#filter_target li')[1].remove();
+    }
+
+    function openCity(evt, cityName) {
+        var i, x, tablinks;
+        x = document.getElementsByClassName("city");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < x.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" w3-khaki", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " w3-khaki";
+    }
+
+    var after_initial = function(){};
+</script>
+
+<script src="refs/general.js"></script>
+<script src="refs/general2.js"></script>
+<script src="refs/ego_general.js"></script>
+<script src="initial.js"></script>
+</html>
